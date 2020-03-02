@@ -1,0 +1,6 @@
+Genesys2 BOARD
+M:	Brett Rudley <brudley@recogni.com>
+S:	Maintained
+F:	board/digilent/genesys2/
+F:	include/configs/ariane_generic.h
+F:	configs/ariane_generic_rv64_defconfig
