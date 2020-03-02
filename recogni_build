@@ -1,0 +1,9 @@
+#PATH should point to gcc 20171231 version
+make distclean;sleep 1;make ariane_generic_rv64_defconfig;sleep 1;make V=1
+make distclean;sleep 1;make ariane_generic_rv64_defconfig;sleep 1;make V=1
+echo Hit return to write to SD card
+read x
+source make_sd
+echo
+echo Making ctags file...
+ctags -R

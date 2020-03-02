@@ -273,8 +273,12 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 
 HOSTCC       = cc
 HOSTCXX      = c++
-HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer \
-		$(if $(CONFIG_TOOLS_DEBUG),-g)
+
+ifeq ($(CONFIG_TOOLS_DEBUG),)
+HOSTCFLAGS   = -Wall -Wstrict-prototypes -Og -fomit-frame-pointer -g
+else
+HOSTCFLAGS   = -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer 
+endif
 HOSTCXXFLAGS = -O2
 
 # With the move to GCC 6, we have implicitly upgraded our language
@@ -648,7 +652,7 @@ endif
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
 else
-KBUILD_CFLAGS	+= -O2
+KBUILD_CFLAGS	+= -Og
 endif
 
 KBUILD_CFLAGS += $(call cc-option,-fno-stack-protector)
