@@ -13,7 +13,22 @@ DECLARE_GLOBAL_DATA_PTR;
 
 int dram_init(void)
 {
-	return fdtdec_setup_mem_size_base();
+
+// #ifdef CONFIG_TARGET_ARIANE_GENERIC
+// //Total hackware copied from ~/u-boot/u-boot-riscv.
+// //I think the realfix is to call board_init_f(ulong boot_flags)
+// //with GD_FLG_SKIP_RELOC.
+
+//     int ret;
+//     gd->flags |= GD_FLG_SKIP_RELOC;
+// 	ret = fdtdec_setup_mem_size_base();
+
+//     return ret;
+// #else
+	int ret = fdtdec_setup_mem_size_base();
+    gd->ram_size = PHYS_SDRAM_0_SIZE;
+	return ret;
+    // #endif
 }
 
 int dram_init_banksize(void)

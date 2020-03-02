@@ -1,0 +1,176 @@
+
+
+# Build and boots u-boot for Ariane.
+# Console works (be sure to disable HW flowcontrol on minicom)
+# Tried to get Ethernet going but gave up... will need to revisit.
+
+This tree is based on: https://github.com/u-boot/u-boot/tree/v2020.01
+
+################
+# Building
+################
+#
+# Build toolchain; I have tried various versions of gcc and this one works best
+# at least for now. build it yourself (kinda painful):
+#
+git clone https://github.com/riscv/riscv-gnu-toolchain
+cd riscv-gnu-toolchain/
+git checkout tags/v20171231
+git submodule update --init --recursive
+sudo mkdir /opt/generic64_v20171231
+chown brett /opt/generic64_v20171231/
+sudo chown brett /opt/generic64_v20171231/
+./configure --prefix=/opt/generic64_v20171231 --with-arch=rv64g
+vi Makefile             # Update INSTALL_DIR to point to new /opt/ directory
+make -j8 XLEN=64        # Takes about 10-15 minutes on my laptop
+#
+# Or Copy toolchain binaries from recogni's google cloud
+# Note the ipdaddress of our google cloud changes perioidicly.
+#
+rsync av your_login@34.94.203.196:/home/brudley/gcc_toolchain_binaries/generic64_v20171231/  /opt/generic64_v20171231
+
+#
+# Setup u-boot and build: 
+#
+git clone https://github.com/recogni/u-boot.git
+git checkout remotes/origin/brett/dev/recogni-uboot
+export PATH=/opt/generic64_v20171231/bin:....   #Point to toolchain created above
+export CROSS_COMPILE=riscv64-unknown-elf-
+make distclean
+make ariane_generic_rv64_defconfig
+make ariane_defconfig
+make
+#
+# insert sdcard into laptop
+#
+sudo fdisk -l
+sudo sgdisk -Z /dev/mmcblk0    # Clear out old partitions
+sudo sgdisk --clear --new=1:2048:67583 --new=2 --typecode=1:3000 --typecode=2:8300 /dev/mmcblk0
+sudo dd if=u-boot.bin of=/dev/mmcblk0p1 status=progress oflag=sync bs=1M
+#
+# At this point Ariane should boot off the card and present serial console
+#
+
+
+################
+# Running 
+################
+#
+# Use minicom or whatever emulator, 115200, 8N1, /dev/ttyUSBx
+# Some commands work, other are not yet plumbed.
+
+#
+# To load helloworld.srec using just 'cat' (e.g. no protocol)
+#
+Recogni # loads 0x80000000
+## Ready for S-Record download ...
+
+#on pc: cat examples/standalone/hello_world.srec > /dev/ttyUSB0
+
+## First Load Addr = 0x80000000
+## Last  Load Addr = 0x800012F7
+## Total Size      = 0x000012F8 = 4856 Bytes
+
+## Start Addr      = 0x00000000
+Recogni # go 0x80000000
+## Starting application at 0x80000000 ...
+Example expects ABI version 9
+Actual U-Boot ABI version 9
+Hello World
+argc = 1
+argv[0] = "0x80000000"
+argv[1] = "<NULL>"
+
+
+#
+## Setting up to gdb for u-boot:
+#While ..... dots are coming out:
+#In one window:
+openocd -f ~/ariane/ariane/fpga/ariane.cfg
+
+#In a different window:
+/opt/generic64_v20171231/bin/riscv64-unknown-elf-gdb ~/u-boot/u-boot/u-boot
+target remote localhost:3333
+b early_uart_init
+c
+
+#After jumping to new program do:
+add-symbol-file ~/u-boot/u-boot/examples/standalone/hello_world
+add symbol table from file "/home/brett/u-boot/u-boot-riscv/examples/standalone/hello_world"
+
+
+#
+# Plain cat is unreliable. To use a protocol like [x|y|z]modem, I use kermit.
+# Create a kermit configuration file like this (your USB port might be dfferent)
+#
+
+#!/home/brett/bin/kermit
+set line /dev/ttyUSB1
+set speed 115200
+set serial 8n1
+set flow-control none
+set handshake none
+set file type bin
+set carrier-watch off
+set prefixing all
+set modem none
+robust
+set file type bin
+set file name lit
+set rec pack 1000
+set send pack 1000
+set window 5
+connect
+
+#invoke like so:
+kermit path/to/config_file
+
+#Use kermit like this:
+Ctrl \ c    Back and forth to/from  u-boot & kermit
+Ctrl \ !    Shell escape
+
+#To load binaries using kermit:
+Use above command line to start
+In u-boot: loadb 0x80200000
+Ctrl \ c to switch to minicom 
+send /home/brett/u-boot/u-boot/examples/standalone/hello_world.bin
+Wait for it to finish
+Ctrl \ c to switch back u-boot
+go 0x80200000
+
+Recogni # go 0x80200000
+## Starting application at 0x80200000 ...
+Hello World
+argc = 1
+argv[0] = "0x80200000"
+argv[1] = "<NULL>"
+Hit any key to exit ... 
+
+
+#
+# use bootm command to boot an OS. I don't have an OS yet so just use helloworld as a proxy for now.
+# bootm requires we package up the 'os' properly.
+#
+#On laptop:
+u-boot$ tools/mkimage -A riscv -O openrtos -T standalone -a 0x80200000 -n Hello -C none -d examples/standalone/hello_world.bin hello_standalone_nocompress.img
+Image Name:   Hello
+Created:      Thu Mar 12 16:43:58 2020
+Image Type:   RISC-V OpenRTOS Standalone Program (uncompressed)
+Data Size:    4856 Bytes = 4.74 KiB = 0.00 MiB
+Load Address: 80200000
+Entry Point:  80200000
+
+
+#In u-boot:
+loadb
+escape back to kermit: kermit send /home/brett/u-boot/u-boot/hello_standalone_nocompress.img
+bootm
+Hello World
+argc = 15
+argv[0] = ""
+argv[1] = ""
+argv[2] = ""
+argv[3] = ""
+argv[4] = ""
+argv[5] = ""
+argv[6] = ""

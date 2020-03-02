@@ -714,8 +714,12 @@ static int fix_fdt(void)
 
 static int jump_to_copy(void)
 {
-	if (gd->flags & GD_FLG_SKIP_RELOC)
+	if (gd->flags & GD_FLG_SKIP_RELOC) {
+        // puts("jump 0\n");
+        // board_init_r(gd, 0);
 		return 0;
+    }
+    // puts("jump 1\n");
 	/*
 	 * x86 is special, but in a nice way. It uses a trampoline which
 	 * enables the dcache if possible.

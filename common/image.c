@@ -1097,6 +1097,7 @@ ulong genimg_get_kernel_addr(char * const img_addr)
  */
 int genimg_get_format(const void *img_addr)
 {
+    int x;
 #if CONFIG_IS_ENABLED(LEGACY_IMAGE_FORMAT)
 	const image_header_t *hdr;
 
@@ -1105,8 +1106,10 @@ int genimg_get_format(const void *img_addr)
 		return IMAGE_FORMAT_LEGACY;
 #endif
 #if IMAGE_ENABLE_FIT || IMAGE_ENABLE_OF_LIBFDT
-	if (fdt_check_header(img_addr) == 0)
+	if ((x = fdt_check_header(img_addr)) == 0) {
 		return IMAGE_FORMAT_FIT;
+    }
+    printf("fdt_check_header returned %d\n", x);
 #endif
 #ifdef CONFIG_ANDROID_BOOT_IMAGE
 	if (android_image_check_header(img_addr) == 0)

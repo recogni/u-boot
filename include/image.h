@@ -878,6 +878,7 @@ void memmove_wd(void *to, void *from, size_t len, ulong chunksz);
 
 static inline int image_check_magic(const image_header_t *hdr)
 {
+    printf("image_check_magic == 0x%x, not IH_MAGIC\n", image_get_magic(hdr));
 	return (image_get_magic(hdr) == IH_MAGIC);
 }
 static inline int image_check_type(const image_header_t *hdr, uint8_t type)

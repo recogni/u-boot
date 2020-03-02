@@ -1,0 +1,6 @@
+#Brett: Use this to create bootable SD card on Ubuntu
+sudo fdisk -l
+sudo sgdisk -Z /dev/mmcblk0    # Clear out old partitions
+sudo sgdisk --clear --new=1:2048:67583 --new=2 --typecode=1:3000 --typecode=2:8300 /dev/mmcblk0
+sudo dd if=u-boot.bin of=/dev/mmcblk0p1 status=progress oflag=sync bs=1M
+

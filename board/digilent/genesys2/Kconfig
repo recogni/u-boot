@@ -1,0 +1,38 @@
+if TARGET_ARIANE_GENERIC
+
+config SYS_CPU
+	default "generic"
+
+config SYS_BOARD
+	default "genesys2"
+
+config SYS_VENDOR
+	default "digilent"
+
+config SYS_SOC
+	default "ariane"
+
+config SYS_CONFIG_NAME
+	default "ariane_generic"
+
+config ENV_SIZE
+	default 0x2000 if ENV_IS_IN_SPI_FLASH
+
+config ENV_OFFSET
+	default 0x140000 if ENV_IS_IN_SPI_FLASH
+
+config SPL_TEXT_BASE
+	default 0x800000
+
+config SPL_OPENSBI_LOAD_ADDR
+	default 0x01000000
+
+config BOARD_SPECIFIC_OPTIONS # dummy
+	def_bool y
+	#select RISCV_NDS
+	#select SUPPORT_SPL
+	#imply SMP
+	#imply SPL_RAM_SUPPORT
+	#imply SPL_RAM_DEVICE
+
+endif
