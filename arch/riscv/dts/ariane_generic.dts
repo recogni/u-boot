@@ -28,15 +28,16 @@
   };
 
   aliases {
-      uart0 = &serial0;
+      console = &uart0;
   };
-  chosen {
-      stdout-path = "uart0:115200n8";
-  };
+  //chosen {
+   //   stdout-path = "uart:115200n8";
+  //};
 
   memory@80000000 {
     device_type = "memory";
-    reg = <0x0 0x80000000 0x0 0x10000000>;
+    //reg = <0x0 0x80000000 0x0 0x10000000>;
+    reg = <0x0 0x80000000 0x0 0x4000000>;
   };
   soc {
     #address-cells = <2>;
@@ -66,15 +67,16 @@
       reg = <0x0 0x0 0x0 0x1000>;
       reg-names = "control";
     };
-    //uart@10000000 {
+    uart0: serial@10000000 {
     //Copying from ae350_64.dts
-    serial0: serial@10000000 {
-      compatible = "ns16750";
+    //serial0: serial@10000000 {
+      //compatible = "ns16750";
+      compatible = "ns16550";
       reg = <0x0 0x10000000 0x0 0x1000>;
       clock-frequency = <50000000>;
       current-speed = <115200>;
       // interrupt-parent = <&PLIC0>;
-      interrupts = <1>;
+      //interrupts = <0>;
       reg-shift = <2>; // regs are spaced on 32 bit boundary
       reg-io-width = <4>; // only 32-bit access are supported
     };
