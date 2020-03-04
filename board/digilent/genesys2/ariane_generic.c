@@ -19,6 +19,8 @@
 int board_init(void)
 {
 	/* For now nothing to do here. */
-
+    puts("ariane_generic board_init()\n");
 	return 0;
 }
+
+

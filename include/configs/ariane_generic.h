@@ -48,7 +48,7 @@
 /*
  * Physical Memory Map
  */
-//#define CONFIG_NR_DRAM_BANKS	1
+#define CONFIG_NR_DRAM_BANKS	1
 #define PHYS_SDRAM_0	0x84000000		/* SDRAM Bank #1 */
 #define PHYS_SDRAM_0_SIZE	0x4000000	/* 64 MB */
 #define CONFIG_SYS_SDRAM_BASE	PHYS_SDRAM_0
@@ -74,7 +74,7 @@
  */
 #define CONFIG_SYS_LOAD_ADDR		0x80200000	/* SDRAM */
 
-/************XXXXXXXXXXXXXXXXXXXXX ************/
+#ifdef FOOBAR
 /* Copied from ax25-ae350.h */
 /* max number of memory banks */
 /*
@@ -85,7 +85,7 @@
 #define CONFIG_SYS_MAX_FLASH_BANKS  1
 #endif
 #define CONFIG_SYS_FLASH_BANKS_SIZES {0x4000000}
-/************XXXXXXXXXXXXXXXXXXXXX ************/
+#endif
 
 /*
  * memtest works on 1 MB in DRAM
@@ -109,11 +109,6 @@
 //#define CONFIG_SF_DEFAULT_CS		0
 //#define CONFIG_SF_DEFAULT_SPEED		1000000
 //#define CONFIG_SF_DEFAULT_MODE		0
-
-// These need backslashes at end of each line
-//#define CONFIG_EXTRA_ENV_SETTINGS   
-//                 "stdout=serial=\0"  
-//                 ""
 
 /*
  * For booting Linux, the board info and command line data
