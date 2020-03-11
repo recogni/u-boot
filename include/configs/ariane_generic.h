@@ -124,6 +124,10 @@
 //#define CONFIG_SYS_LDSCRIPT	"arch/riscv/cpu/ariane/u-boot.lds"
 
 
+#define CONFIG_XILINX_AXIEMAC
+//#define CONFIG_PHY_REALTEK
+//#define CONFIG_RGMII
+//#define CONFIG_DM_MDIO
 
 #ifdef FOOBAR
 #define read_csr(reg) ({ uint64_t __tmp;         \
