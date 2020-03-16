@@ -1,0 +1,204 @@
+https://github.com/u-boot/u-boot/tree/v2020.01
+
+
+On laptop: ~/u-boot/u-boot-riscv
+
+# Bottom line: Builds and boots u-boot.
+# COnsole works (be sure to disable HW flowcontrol on minicom)
+# Tried to get Ethernet going but gave up... will need to revisit.
+# All mods committed to my local tree in ~/u-boot/u-boot-riscv
+# Also standard tree in ~/u-boot/u-boot.
+
+git clone https://github.com/jrrk/u-boot-riscv
+git checkout -b ariane
+export PATH=/opt/generic64_v20171231/bin:/home/brett/.nvm/versions/n....
+echo $PATH
+export CROSS_COMPILE=riscv64-unknown-elf-
+make distclean
+make ariane_defconfig
+make
+source go
+
+
+###
+# Minicom: With Ariane Use port /dev/ttyUSB0
+###
+Kermit:  
+set modem type none
+set speed 115200
+set port /dev/ttyUSB0
+
+Ctrl \ c    Back and forth to/from  u-boot & kermit
+Ctrl \ !    Shell escape
+
+#Been running this for genesysII console:
+/home/brett/bin/kermit /home/brett/bin/go-kermit
+
+#To load binaries using kermit:
+Use above command line to start
+In u-boot: loadb 0x80200000
+Ctrl \ c to switch to minicom 
+send /home/brett/u-boot/u-boot/examples/standalone/hello_world.bin
+Wait for it to finish
+Ctrl \ c to switch back u-boot
+go 0x80200000
+Recogni # imi
+
+## Checking Image at 80200000 ...
+image_check_magic == 0x79714ae8, not IH_MAGIC
+fdt_check_header returned -9
+Unknown image format!
+Recogni # go 0x80200000
+## Starting application at 0x80200000 ...
+Example expects ABI version 9
+Actual U-Boot ABI version 9
+Hello World
+argc = 1
+argv[0] = "0x80200000"
+argv[1] = "<NULL>"
+Hit any key to exit ... 
+
+
+
+
+#######
+# Building with PATH=/opt/generic_rv64/bin had problems linking. 
+# Downloaded RISCV Gcc toolchain from 12/31/2017 and that works fine.
+# /opt/generic64_v20171231/bin.
+# Sticking with that for now
+#########
+
+
+go:
+sudo sgdisk -Z /dev/mmcblk0    # Clear out old partitions
+sudo sgdisk --clear --new=1:2048:67583 --new=2 --typecode=1:3000 --typecode=2:8300 /dev/mmcblk0
+sudo dd if=u-boot.bin of=/dev/mmcblk0p1 status=progress oflag=sync bs=1M
+
+#While ..... dots are coming out:
+#In one window:
+openocd -f ~/ariane/ariane/fpga/ariane.cfg
+
+#In a different window:
+/opt/generic_rv64/bin/riscv64-unknown-elf-gdb ~/u-boot/u-boot-riscv/u-boot
+or
+/opt/generic64_v20171231/bin/riscv64-unknown-elf-gdb ~/u-boot/u-boot/u-boot
+target remote localhost:3333
+b early_uart_init
+c
+
+Use the 'conn' command from .gdbinit to do the target remote stuff
+
+From doc/README.kconfig:
+Tips to add/remove boards
+-------------------------
+
+When adding a new board, the following steps are generally needed:
+
+ [1] Add a header file include/configs/<target>.h
+ [2] Make sure to define necessary CONFIG_SYS_* in Kconfig:
+       Define CONFIG_SYS_CPU="cpu" to compile arch/<arch>/cpu/<cpu>
+       Define CONFIG_SYS_SOC="soc" to compile arch/<arch>/cpu/<cpu>/<soc>
+       Define CONFIG_SYS_VENDOR="vendor" to compile board/<vendor>/common/*
+         and board/<vendor>/<board>/*
+       Define CONFIG_SYS_BOARD="board" to compile board/<board>/*
+         (or board/<vendor>/<board>/* if CONFIG_SYS_VENDOR is defined)
+       Define CONFIG_SYS_CONFIG_NAME="target" to include
+         include/configs/<target>.h
+ [3] Add a new entry to the board select menu in Kconfig.
+     The board select menu is located in arch/<arch>/Kconfig or
+     arch/<arch>/*/Kconfig.
+ [4] Add a MAINTAINERS file
+     It is generally placed at board/<board>/MAINTAINERS or
+     board/<vendor>/<board>/MAINTAINERS
+ [5] Add configs/<target>_defconfig
+
+
+#######################
+# Looks like these guys implemented a baremetal ethernet driver
+# that will do remote tftp before u-boot even runs.
+########################
+Standalone ethernet boot from lowrisc:
+https://github.com/lowRISC/lowrisc-chip/issues/85
+~/lowrisc-chip/fpga/bare_metal/examples/boot.c:130
+
+Proper address from ~/ariane/ariane/tb/ariane_soc_pkg.sv
+ EthernetBase = 64'h3000_0000, 
+
+
+(gdb) show disassemble-next-line
+Debugger's willingness to use disassemble-next-line is off.
+(gdb) set disassemble-next-line on
+(gdb) show disassemble-next-line
+Debugger's willingness to use disassemble-next-line is on.
+
+#After jumping to new program do:
+add-symbol-file ~/u-boot/u-boot-riscv/examples/standalone/hello_world
+add symbol table from file "/home/brett/u-boot/u-boot-riscv/examples/standalone/hello_world"
+
+####################################
+# Starting from scratch in ~/u-boot/u-boot$ make ae350_rv64_defconfig
+# Using a guide at https://www.imx6rex.com/open-rex/software/yocto-uboot-how-to-add-support-for-a-custom-board/
+#
+# Using reference: #    arch/riscv/dts/ae350_64.dts
+#    make ae350_rv64_defconfig; make  builds clean
+#
+####################################
+TARGET_AX25_AE350
+
+SPL, TPL => Super low memory image... we don;t need this
+
+fdtdec_setup_mem_size_base_fdt   pareses base and length, seems correct.
+setup_dest_addr  
+
+
+############
+# Loading helloworld.srec
+############
+in u-boot: loads
+on pc: cat examples/standalone/hello_world.srec > /dev/ttyUSB0
+u-boot should show start adress of 0x80000000
+in u-boot: go 0x80000000
+
+hmmm, using new u-boot tree from master
+~/u-boot/u-boot
+loads loads at 0.
+But this works:
+Recogni # loads 0x80000000
+## Ready for S-Record download ...
+
+## First Load Addr = 0x80000000
+## Last  Load Addr = 0x800012F7
+## Total Size      = 0x000012F8 = 4856 Bytes
+
+## Start Addr      = 0x00000000
+Recogni # go 0x80000000
+## Starting application at 0x80000000 ...
+Example expects ABI version 9
+Actual U-Boot ABI version 9
+Hello World
+argc = 1
+argv[0] = "0x80000000"
+argv[1] = "<NULL>"
+
+############
+#Let bootm work by using mkimage on pc to package up
+############
+brett@brett-laptop:~/u-boot/u-boot$ tools/mkimage -A riscv -O openrtos -T standalone -a 0x80200000 -n Hello -C none -d examples/standalone/hello_world.bin hello_standalone_nocompress.img
+Image Name:   Hello
+Created:      Thu Mar 12 16:43:58 2020
+Image Type:   RISC-V OpenRTOS Standalone Program (uncompressed)
+Data Size:    4856 Bytes = 4.74 KiB = 0.00 MiB
+Load Address: 80200000
+Entry Point:  80200000
+
+#Other option is -T kernel (kernel_noload):w
+
+loadb
+kermit send /home/brett/u-boot/u-boot/hello_standalone_nocompress.img
+bootm
+Hello World
+argc = 15
+argv[0] = ""
+argv[1] = ""
+argv[2] = ""
+argv[3] = ""
