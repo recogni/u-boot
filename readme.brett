@@ -1,5 +1,10 @@
-https://github.com/u-boot/u-boot/tree/v2020.01
 
+Original .git/congfig had this;
+[remote "origin"]
+	url = http://git.denx.de/u-boot.git
+
+I cloned this from;
+https://github.com/u-boot/u-boot/tree/v2020.01
 
 On laptop: ~/u-boot/u-boot-riscv
 
@@ -125,6 +130,7 @@ Proper address from ~/ariane/ariane/tb/ariane_soc_pkg.sv
  EthernetBase = 64'h3000_0000, 
 
 
+#Gdb tip
 (gdb) show disassemble-next-line
 Debugger's willingness to use disassemble-next-line is off.
 (gdb) set disassemble-next-line on
