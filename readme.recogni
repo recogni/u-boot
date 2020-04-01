@@ -11,7 +11,7 @@ This tree is based on: https://github.com/u-boot/u-boot/tree/v2020.01
 ################
 #
 # Build toolchain; I have tried various versions of gcc and this one works best
-# at least for now.
+# at least for now. build it yourself (kinda painful):
 #
 git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain/
@@ -24,13 +24,17 @@ sudo chown brett /opt/generic64_v20171231/
 vi Makefile             # Update INSTALL_DIR to point to new /opt/ directory
 make -j8 XLEN=64        # Takes about 10-15 minutes on my laptop
 #
-# Or clone toolchain: TBD
+# Or Copy toolchain binaries from recogni's google cloud
+# Note the ipdaddress of our google cloud changes perioidicly.
 #
+rsync av your_login@34.94.203.196:/home/brudley/gcc_toolchain_binaries/generic64_v20171231/  /opt/generic64_v20171231
 
-# To setup u-boot and build: 
+#
+# Setup u-boot and build: 
+#
 git clone https://github.com/recogni/u-boot.git
 git checkout remotes/origin/brett/dev/recogni-uboot
-export PATH=/opt/generic64_v20171231/bin:....
+export PATH=/opt/generic64_v20171231/bin:....   #Point to toolchain created above
 export CROSS_COMPILE=riscv64-unknown-elf-
 make distclean
 make ariane_generic_rv64_defconfig
@@ -49,7 +53,7 @@ sudo dd if=u-boot.bin of=/dev/mmcblk0p1 status=progress oflag=sync bs=1M
 
 
 ################
-# Running
+# Running 
 ################
 #
 # Use minicom or whatever emulator, 115200, 8N1, /dev/ttyUSBx
@@ -91,7 +95,7 @@ b early_uart_init
 c
 
 #After jumping to new program do:
-add-symbol-file ~/u-boot/u-boot-riscv/examples/standalone/hello_world
+add-symbol-file ~/u-boot/u-boot/examples/standalone/hello_world
 add symbol table from file "/home/brett/u-boot/u-boot-riscv/examples/standalone/hello_world"
 
 
