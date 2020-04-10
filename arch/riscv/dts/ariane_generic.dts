@@ -8,7 +8,7 @@
 
   aliases {
       console = &uart0;
-      ethernet0 = &axi_ethernetlite_1;
+      //ethernet0 = &axi_ethernetlite_1;
   };
   cpus {
     #address-cells = <1>;
@@ -32,79 +32,8 @@
     };
   };
 
-  //chosen {
-   //   stdout-path = "uart:115200n8";
-  //};
-
-//https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18841972/Linux+Emaclite+Driver
-axi_ethernetlite_1: ethernet@30000000 {
-                       compatible = "xlnx,axi-ethernetlite-3.0", "xlnx,xps-ethernetlite-1.00.a";
-                       device_type = "network";
-                       //interrupt-parent = <&axi_intc_1>;
-                       interrupt-parent = <&PLIC0>;
-                       interrupts = <1 0>;
-                       local-mac-address = [00 0a 35 00 00 00];
-                       phy-handle = <&phy0>;
-                       reg = <0x40e00000 0x10000>;
-                       xlnx,duplex = <0x1>;
-                       xlnx,include-global-buffers = <0x1>;
-                       xlnx,include-internal-loopback = <0x0>;
-                       xlnx,include-mdio = <0x1>;
-                       xlnx,instance = "axi_ethernetlite_inst";
-                       xlnx,rx-ping-pong = <0x1>;
-                       xlnx,s-axi-id-width = <0x1>;
-                       xlnx,tx-ping-pong = <0x1>;
-                       xlnx,use-internal = <0x0>;
-                       mdio {
-                               #address-cells = <1>;
-                               #size-cells = <0>;
-                               phy0: phy@7 {
-                                       compatible = "marvell,88e1111";
-                                       device_type = "ethernet-phy";
-                                       reg = <7>;
-                               } ;
-                       } ;
-               } ;
-
-//https://www.kernel.org/doc/Documentation/devicetree/bindings/net/xilinx_axienet.txt
-//https://xilinx-wiki.atlassian.net/wiki/spaces/A/pages/18842485/Linux+AXI+Ethernet+driver#LinuxAXIEthernetdriver-Device-tree
-//axi_ethernet_eth: ethernet@30000000 {
-//		compatible = "xlnx,axi-ethernet-1.00.a";
-//        //axistream-connected = <&axi_dma_1>;
-//        //axistream-control-connected = <&axi_dma_1>;
-//		device_type = "network";
-//        interrupt-parent = <&PLIC0>;
-//		interrupts = <2 0 1>;
-//		//clocks = <&axi_clk>;
-//		phy-mode = "rmii";
-//        reg = <0x0 0x30000000 0x0 0x10000>;
- //       xlnx,phy-type = <0x4>;
-//        xlnx,phyaddr = <0x1>;
-//		xlnx,rxcsum = <0x2>;
-//		xlnx,rxmem = <0x800>;
-//		xlnx,txcsum = <0x2>;
-//		phy-handle = <&phy0>;
-//		axi_ethernetlite_0_mdio: mdio {
-//			#address-cells = <1>;
-//			#size-cells = <0>;
-//			phy0: phy@0 {
-//				device_type = "ethernet-phy";
-//				reg = <1>;
-//			};
-//		};
-//	};
-    //compatible = "xlnx,axi-ethernet-1.00.a";
-    //reg = <0x0 0x30000000 0x0 0x10000>;
-    //status = "disabled";
-    //interrupts = <0 22 4>;
-    //clocks = <&clkc 30>, <&clkc 30>, <&clkc 13>;
-    //clock-names = "pclk", "hclk", "tx_clk";
-    //#address-cells = <1>;
-    //#size-cells = <0>;
-
   memory@80000000 {
     device_type = "memory";
-    //reg = <0x0 0x80000000 0x0 0x10000000>;
     reg = <0x0 0x80000000 0x0 0x40000000>;  //1 Gbyte
   };
   soc {
@@ -118,7 +47,7 @@ axi_ethernetlite_1: ethernet@30000000 {
       reg = <0x0 0x2000000 0x0 0xc0000>;
       reg-names = "control";
     };
-    // PLIC needs to be disabeld for tandem verification
+    // PLIC needs to be disabled for tandem verification
     PLIC0: interrupt-controller@c000000 {
       #address-cells = <0>;
       #interrupt-cells = <1>;
@@ -155,20 +84,6 @@ axi_ethernetlite_1: ethernet@30000000 {
     }; //SOC
 }; //main
 
-//&gem0 {
-//    status = "okay";
-//    phy-mode = "rgmii-id";
-//    phy-handle = <&ethernet_phy>;
-//    //pinctrl-names = "default";
-//    //pinctrl-0 = <&pinctrl_gem0_default>;
-//    //phy-reset-gpio = <&gpio0 11 0>;
-//    //phy-reset-active-low;
-//
-//    ethernet_phy: ethernet-phy@0 {
-//        reg = <0>;
-//        device_type = "ethernet-phy";
-//    };
-//}; //gem
 
 
 
