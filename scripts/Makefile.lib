@@ -146,7 +146,7 @@ __cpp_flags     = $(call flags,_cpp_flags)
 endif
 
 # Modified for U-Boot: LINUXINCLUDE -> UBOOTINCLUDE
-c_flags        = -Wp,-MD,$(depfile) $(NOSTDINC_FLAGS) $(UBOOTINCLUDE)     \
+c_flags        = -Wp,-MMD,$(depfile) $(NOSTDINC_FLAGS) $(UBOOTINCLUDE)    \
 		 $(__c_flags) $(modkern_cflags)                           \
 		 $(basename_flags) $(modname_flags)
 
